@@ -1,0 +1,15 @@
+{
+  "name": "mein-tag",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Persönliches Tagebuch & Life-Management-System (PWA) – Netlify",
+  "scripts": {
+    "dev": "netlify dev",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.4",
+    "web-push": "^3.6.7"
+  }
+}

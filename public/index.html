@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mein Tag</title>
+  <meta name="description" content="Persönliches Tagebuch und Life-Management-System.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/assets/img/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mein Tag">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body class="is-locked">
+
+  <!-- Sperrbildschirm -->
+  <div class="lock">
+    <form class="lock-card" id="lockForm" autocomplete="off">
+      <img class="lock-logo" src="/assets/img/icon-192.png" alt="">
+      <h1 class="lock-title">Mein Tag</h1>
+      <p class="lock-sub">PIN eingeben</p>
+      <input class="input pin-input" id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" aria-label="PIN" autocomplete="off">
+      <p class="lock-error" id="pinError" role="alert"></p>
+      <button class="btn btn--primary btn--block" type="submit" id="pinSubmit" style="margin-top:6px">Entsperren</button>
+      <label class="check"><input type="checkbox" id="rememberPin" checked> Auf diesem Gerät angemeldet bleiben</label>
+    </form>
+  </div>
+
+  <!-- App -->
+  <div class="app-ui">
+    <div class="island-wrap">
+      <div class="island" id="island" role="button" tabindex="0" aria-expanded="false" aria-controls="islandPanel">
+        <span class="island__dot" id="islandDot"></span>
+        <span class="island__text" id="islandText">Mein Tag</span>
+        <span class="island__btn" aria-hidden="true">⌄</span>
+      </div>
+    </div>
+    <div class="island-scrim" id="islandScrim"></div>
+    <nav class="island-panel" id="islandPanel" aria-label="Navigation"></nav>
+
+    <div class="corner">
+      <span class="sync-dot" id="syncDot" title="Synchronisiert"></span>
+      <button class="btn btn--soft btn--sm" id="pushBtn" hidden>🔔 Push aktivieren</button>
+      <button class="btn btn--soft btn--sm" id="lockBtn">Sperren</button>
+    </div>
+
+    <main class="shell" id="view" tabindex="-1"></main>
+
+    <button class="fab" id="fab" aria-label="Schnell hinzufügen">+</button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/assets/js/lead-schedule.js"></script>
+  <script src="/assets/js/model.js"></script>
+  <script src="/assets/js/core.js"></script>
+  <script src="/assets/js/views/today.js"></script>
+  <script src="/assets/js/views/journal.js"></script>
+  <script src="/assets/js/views/calendar.js"></script>
+  <script src="/assets/js/views/todos.js"></script>
+  <script src="/assets/js/views/training.js"></script>
+  <script src="/assets/js/views/goals.js"></script>
+  <script src="/assets/js/views/health.js"></script>
+  <script src="/assets/js/views/body.js"></script>
+  <script src="/assets/js/views/brainstorm.js"></script>
+  <script src="/assets/js/views/weekly.js"></script>
+  <script>App.start();</script>
+</body>
+</html>
