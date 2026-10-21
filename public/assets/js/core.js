@@ -522,6 +522,16 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggleIsland(false); });
     $("#fab").addEventListener("click", () => toggleIsland(true));
     setInterval(updateIsland, 30000);
+    // Tagesplan jede Minute neu zeichnen, damit die rote Jetzt-Linie mitwandert
+    let lastMinute = new Date().getMinutes();
+    setInterval(() => {
+      const m = new Date().getMinutes();
+      if (m === lastMinute) return;
+      lastMinute = m;
+      const onPlan = /^#?\/?$|^#\/tag\//.test(location.hash || "");
+      const busy = document.querySelector(".sheet-form") || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "");
+      if (onPlan && !busy && !document.body.classList.contains("is-locked") && !document.hidden) render(false);
+    }, 15000);
     // Während eines Trainings läuft die Island sekundengenau mit (Gesamtzeit + Pause)
     setInterval(() => {
       if (!document.body.classList.contains("is-locked") && store.all("sessions").some((s) => s.active)) updateIslandText();

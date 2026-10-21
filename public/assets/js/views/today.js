@@ -126,12 +126,28 @@
     const pct = items.length ? Math.round((done / items.length) * 100) : 0;
     const nowLine = isToday ? min : null;
 
-    const timeline = timed.map(({ it, i }, n) => {
+    /* Rote Jetzt-Linie an der richtigen Stelle der Timeline:
+       vor einem Termin, zwischen zwei Terminen oder – während ein Termin läuft –
+       anteilig innerhalb seiner Box (z. B. 13:05 bei Arbeit 08:00–14:00 ≈ 85 %). */
+    const nowLabel = nowLine === null ? "" : `${M.pad(Math.floor(nowLine / 60))}:${M.pad(nowLine % 60)}`;
+    const lineHTML = (style = "") => `<div class="now-line${style ? " now-line--inside" : ""}"${style ? ` style="${style}"` : ""}><span>${nowLabel}</span></div>`;
+    const span = (it) => {
       const start = App.minutesOf(it.time);
-      const showNow = nowLine !== null && start > nowLine && (n === 0 || App.minutesOf(timed[n - 1].it.time) <= nowLine);
-      return `${showNow ? `<div class="now-line"><span>${M.pad(Math.floor(nowLine / 60))}:${M.pad(nowLine % 60)}</span></div>` : ""}
-        <div class="plan-row"><div class="plan-time">${esc(it.time)}${it.end ? `<small>${esc(it.end)}</small>` : ""}</div>${boxHTML(it, i, date)}</div>`;
-    }).join("");
+      const end = App.minutesOf(it.end);
+      return { start, end: end !== null && end > start ? end : null };
+    };
+    let placed = nowLine === null;
+    const timeline = timed.map(({ it, i }) => {
+      const { start, end } = span(it);
+      let before = "", inside = "";
+      if (!placed && nowLine < start) { before = lineHTML(); placed = true; }
+      else if (!placed && end !== null && nowLine < end) {
+        const pct = Math.max(2, Math.min(98, ((nowLine - start) / (end - start)) * 100));
+        inside = lineHTML(`top:${pct.toFixed(1)}%`);
+        placed = true;
+      }
+      return `${before}<div class="plan-row${inside ? " plan-row--now" : ""}"><div class="plan-time">${esc(it.time)}${it.end ? `<small>${esc(it.end)}</small>` : ""}</div>${boxHTML(it, i, date)}${inside}</div>`;
+    }).join("") + (!placed && timed.length ? lineHTML() : "");
 
     const sleepHTML = d.sleep ? `<div class="big-number" style="font-size:24px">${fmtMinutes(d.sleep.sleepDuration)}</div>
       <div class="muted small">${[d.sleep.sleepScore ? `Score ${d.sleep.sleepScore}` : "", d.sleep.deepSleep ? `Tief ${d.sleep.deepSleep} min` : ""].filter(Boolean).join(" · ")}</div>`
@@ -176,7 +192,7 @@
         ${absences.map((a) => `<button type="button" class="absence-banner" data-absence-id="${esc(a.ref.id)}" style="--c:${a.color}"><b>${esc(a.title)}</b><span>${esc(a.sub || "")}${M.absenceKind(a.ref.absence).mutePush ? " · Routine pausiert · keine Push-Erinnerungen" : " · Arbeit entfällt"}</span></button>`).join("")}
         ${items.length ? `<div class="progress ${pct === 100 ? "progress--good" : ""}" style="margin:12px 0 18px"><span style="width:${pct}%"></span></div>` : ""}
         ${untimed.length ? `<div class="plan-untimed">${untimed.map(({ it, i }) => boxHTML(it, i, date)).join("")}</div>` : ""}
-        ${timed.length ? `<div class="plan-timeline">${timeline}${nowLine !== null && timed.length && App.minutesOf(timed[timed.length - 1].it.time) <= nowLine ? `<div class="now-line"><span>${M.pad(Math.floor(nowLine / 60))}:${M.pad(nowLine % 60)}</span></div>` : ""}</div>` : ""}
+        ${timed.length ? `<div class="plan-timeline">${timeline}</div>` : ""}
         ${!items.length ? `<p class="empty">${absences.length ? "Heute steht nichts an – gute Besserung bzw. genieß die Zeit." : "Lege deine Routine an – z. B. Arbeit Mo–Fr 08:15–16:15 oder Gym Mo/Di/Do/Fr."}</p>` : ""}
       </section>
 

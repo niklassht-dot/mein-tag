@@ -529,6 +529,8 @@ body.is-locked .app-ui { display: none !important; }
 .plan-box.is-overdue .plan-sub { color: var(--bad); }
 .plan-box .btn { align-self: center; }
 .now-line { position: relative; height: 0; border-top: 1.5px solid var(--bad); margin: 4px 0 4px 54px; }
+.plan-row--now { position: relative; }
+.now-line--inside { position: absolute; left: 0; right: 0; margin: 0 0 0 54px; z-index: 2; pointer-events: none; }
 .now-line span { position: absolute; left: -58px; top: -9px; font-size: 11.5px; font-weight: 700; color: var(--bad); font-variant-numeric: tabular-nums; }
 
 .followups { margin-top: 18px; padding: 4px 4px; }
