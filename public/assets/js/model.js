@@ -383,14 +383,26 @@
     return rankFromScore(exerciseRanks.reduce((a, r) => a + r.rank.score, 0) / exerciseRanks.length);
   }
 
+  const RANK_MIN_KM = 2;
+  const runKm = (r) => Number(String((r && r.distance) ?? "").replace(",", ".")) || 0;
+  const runSeconds = (r) => {
+    const v = r && r.duration;
+    if (typeof v === "string" && v.includes(":")) return parseDuration(v);
+    return Number(v) || 0;
+  };
+  /** Läufe, die für den Rang lang genug sind, aber keine Zeit haben. */
+  function runsMissingTime(runs) {
+    return (runs || []).filter((r) => runKm(r) >= RANK_MIN_KM && !runSeconds(r));
+  }
+
   /** Ausdauer-Rang: geschätzte 5-km-Zeit (Riegel) aus dem besten Lauf ≥ 3 km. */
   const RUN_5K_STANDARDS = [35 * 60, 29 * 60, 25 * 60, 22 * 60, 19 * 60]; // Beginn Silber … Champion
   function enduranceRank(runs) {
     let best = null;
     (runs || []).forEach((r) => {
-      const d = Number(r.distance) || 0;
-      const t = Number(r.duration) || 0;
-      if (d < 3 || !t) return;
+      const d = runKm(r);
+      const t = runSeconds(r);
+      if (d < RANK_MIN_KM || !t) return;
       const est = t * Math.pow(5 / d, 1.06);
       if (!best || est < best.time) best = { time: est, run: r };
     });
@@ -658,7 +670,7 @@
     MUSCLES, setPerformance, bestByExercise, weeklyStrengthProgress, exerciseHistory, knownExercises,
     levelFromXp, muscleProgress, enduranceProgress,
     parseDuration, formatDuration, pace,
-    goalCurrent, goalProgress, exerciseGoalInfo,
+    goalCurrent, goalProgress, exerciseGoalInfo, runsMissingTime, RANK_MIN_KM,
     RATINGS, CLOSING_QUESTIONS, closingDone,
     buildWeeklyContext, buildFeedbackPrompt
   };

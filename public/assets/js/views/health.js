@@ -292,7 +292,13 @@
             ${er ? `<div style="display:flex;align-items:center;gap:10px;margin-top:4px">${App.rankEmblem(er.rank, 40)}<div><div class="big-number" style="font-size:24px">${esc(er.rank.label)}</div>
               <div class="muted small">5 km ≈ ${M.formatDuration(er.est5k, false)}</div></div></div>
               ${er.rank.next ? `<div class="progress" style="margin-top:10px"><span style="width:${Math.round(er.rank.progress * 100)}%;background:${er.rank.color}"></span></div><div class="progress-meta"><span>${esc(er.rank.name)}</span><span>${esc(er.rank.next.name)} ab ${M.formatDuration(er.nextTime, false)}</span></div>` : ""}`
-              : `<p class="muted small" style="margin-top:6px">Rang ab dem ersten Lauf über 3 km (geschätzte 5-km-Zeit, verglichen mit Männern).</p>`}
+              : (() => {
+                const missing = M.runsMissingTime(runs);
+                return missing.length
+                  ? `<p class="small" style="margin-top:6px">Für den Rang fehlt die <b>Laufzeit</b> bei ${missing.length === 1 ? "deinem Lauf" : `${missing.length} Läufen`}.</p>
+                     <button class="btn btn--soft btn--sm" style="margin-top:8px" data-fix-run="${esc(missing[0].id)}">Zeit eintragen (${esc(fmtShort(missing[0].date))}, ${(Math.round(Number(String(missing[0].distance).replace(",", ".")) * 10) / 10).toLocaleString("de-DE")} km)</button>`
+                  : `<p class="muted small" style="margin-top:6px">Rang ab dem ersten Lauf über ${M.RANK_MIN_KM} km mit Zeit (geschätzte 5-km-Zeit, verglichen mit Männern).</p>`;
+              })()}
           </div>
           <div class="card"><div class="card-kicker">Diese Woche</div><div class="big-number">${(Math.round(weekKm * 10) / 10).toLocaleString("de-DE")}<small>km</small></div></div>
           <div class="card"><div class="card-kicker">Gesamt</div><div class="big-number">${endurance.km.toLocaleString("de-DE")}<small>km · ${endurance.runs} Läufe</small></div></div>
@@ -328,6 +334,8 @@
     },
     mount(root, params, query) {
       $("[data-add]", root).onclick = () => App.openRunSheet();
+      const fix = $("[data-fix-run]", root);
+      if (fix) fix.onclick = () => App.openRunSheet(store.get("runs", fix.dataset.fixRun));
       $("[data-plan]", root).onclick = () => App.openRunPlanSheet();
       if (query && query.get("strava")) {
         App.toast(query.get("strava") === "ok" ? "Strava verbunden ✓" : "Strava-Verbindung fehlgeschlagen", query.get("strava") !== "ok");

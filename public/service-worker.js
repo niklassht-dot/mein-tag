@@ -2,7 +2,7 @@
    - App-Hülle offline verfügbar (Netzwerk zuerst, Cache als Rückfall)
    - Push-Benachrichtigungen anzeigen, Klick öffnet den passenden Bereich */
 
-const CACHE = "meintag-shell-v7";
+const CACHE = "meintag-shell-v8";
 const SHELL = [
   "/", "/index.html", "/assets/css/app.css", "/manifest.webmanifest",
   "/assets/js/lead-schedule.js", "/assets/js/model.js", "/assets/js/core.js",
