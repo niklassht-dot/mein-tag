@@ -81,7 +81,7 @@ a { color: inherit; text-decoration: none; }
 .shell {
   max-width: 1120px;
   margin: 0 auto;
-  padding: calc(84px + var(--safe-top)) clamp(16px, 4vw, 40px) calc(110px + var(--safe-bottom));
+  padding: calc(84px + var(--safe-top)) clamp(16px, 4vw, 40px) calc(190px + var(--safe-bottom));
 }
 
 .view { animation: viewIn 0.45s var(--ease); }
@@ -395,7 +395,7 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 0; bo
 .fab {
   position: fixed;
   right: 18px;
-  bottom: calc(22px + var(--safe-bottom));
+  bottom: calc(104px + var(--safe-bottom));
   z-index: 40;
   width: 58px; height: 58px;
   border-radius: 50%;
@@ -697,3 +697,68 @@ body.is-locked .app-ui { display: none !important; }
 }
 .absence-banner b { font-size: 15.5px; }
 .absence-banner span { font-size: 13px; color: var(--muted); }
+
+/* ---------------- Tab-Leiste (schwebende Glas-Pille) ---------------- */
+.tabbar {
+  --tab-bg: rgba(250, 250, 252, 0.86);
+  --tab-border: rgba(0, 0, 0, 0.08);
+  --tab-pill: rgba(0, 0, 0, 0.08);
+  --tab-ico: #1d1d1f;
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 45;
+  width: min(calc(100% - 28px), 460px);
+  height: 68px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  border-radius: 999px;
+  background: var(--tab-bg);
+  border: 1px solid var(--tab-border);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+@media (prefers-color-scheme: dark) {
+  .tabbar {
+    --tab-bg: rgba(24, 24, 27, 0.86);
+    --tab-border: rgba(255, 255, 255, 0.12);
+    --tab-pill: rgba(255, 255, 255, 0.14);
+    --tab-ico: #f5f5f7;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+.tabbar__pill {
+  position: absolute;
+  top: 6px; bottom: 6px; left: 6px;
+  width: calc((100% - 12px) / 5);
+  border-radius: 999px;
+  background: var(--tab-pill);
+  transform: translateX(calc(var(--tab-index, 0) * 100%));
+  transition: transform 0.45s var(--ease), opacity 0.2s;
+}
+.tabbar[data-active="none"] .tabbar__pill { opacity: 0; }
+.tabbar__item {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  border-radius: 999px;
+  color: var(--tab-ico);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar__item svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s var(--ease); }
+.tabbar__item:active svg { transform: scale(0.88); }
+.tabbar__item.is-active svg .fillable { fill: currentColor; }
+.tabbar__item.is-active svg .cut { stroke: var(--tab-cut); }
+.tabbar { --tab-cut: #f2f2f5; }
+@media (prefers-color-scheme: dark) { .tabbar { --tab-cut: #2a2a2d; } }
+body.is-locked .tabbar { display: none; }
+@media (min-width: 1000px) { .tabbar { bottom: 22px; } }

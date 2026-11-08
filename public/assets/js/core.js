@@ -395,6 +395,7 @@
       bindSliders(view);
       window.scrollTo(0, scroll);
       updateIsland();
+      updateTabbar();
       return;
     }
     location.hash = "#/";
@@ -488,12 +489,48 @@
       </div>`;
   }
 
+  /* Tab-Leiste unten: aktiven Bereich markieren, „Mehr“ öffnet alle Bereiche */
+  const TABS = [
+    { tab: "home", test: (h) => h === "#/" || h === "" || h.startsWith("#/tag/") },
+    { tab: "kalender", test: (h) => h.startsWith("#/kalender") },
+    { tab: "training", test: (h) => h.startsWith("#/training") },
+    { tab: "todos", test: (h) => h.startsWith("#/todos") }
+  ];
+  function updateTabbar() {
+    const bar = $("#tabbar");
+    if (!bar) return;
+    const h = location.hash || "#/";
+    const idx = TABS.findIndex((t) => t.test(h));
+    const active = idx === -1 ? 4 : idx; // andere Bereiche zählen zu „Mehr“
+    bar.style.setProperty("--tab-index", active);
+    bar.dataset.active = String(active);
+    bar.querySelectorAll(".tabbar__item").forEach((el, i) => {
+      el.classList.toggle("is-active", i === active);
+      if (i === active) el.setAttribute("aria-current", "page"); else el.removeAttribute("aria-current");
+    });
+  }
+  function bindTabbar() {
+    const bar = $("#tabbar");
+    if (!bar) return;
+    bar.querySelector('[data-tab="more"]').addEventListener("click", () => toggleIsland());
+    bar.querySelectorAll("a.tabbar__item").forEach((a) => a.addEventListener("click", () => toggleIsland(false)));
+    updateTabbar();
+  }
+
   function toggleIsland(open) {
     const panel = $("#islandPanel");
     const isOpen = open ?? !panel.classList.contains("is-open");
     panel.classList.toggle("is-open", isOpen);
     $("#islandScrim").classList.toggle("is-open", isOpen);
     $("#island").setAttribute("aria-expanded", String(isOpen));
+    // „Mehr“ in der Tab-Leiste markieren, solange alle Bereiche offen sind
+    const bar = $("#tabbar");
+    if (bar) {
+      if (isOpen) {
+        bar.style.setProperty("--tab-index", 4);
+        bar.querySelectorAll(".tabbar__item").forEach((el, i) => el.classList.toggle("is-active", i === 4));
+      } else updateTabbar();
+    }
   }
 
   function bindIsland() {
@@ -660,6 +697,7 @@
       started = true;
       store.subscribe(() => { render(false); updateIsland(); });
       window.addEventListener("hashchange", () => render(true));
+      bindTabbar();
       bindIsland();
       initPush();
       document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { sync().catch(() => {}); loadFollowups(); } });

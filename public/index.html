@@ -53,6 +53,26 @@
     <main class="shell" id="view" tabindex="-1"></main>
 
     <button class="fab" id="fab" aria-label="Schnell hinzufügen">+</button>
+
+    <!-- Tab-Leiste unten (schwebende Glas-Pille) -->
+    <nav class="tabbar" id="tabbar" aria-label="Hauptnavigation">
+      <span class="tabbar__pill" id="tabbarPill" aria-hidden="true"></span>
+      <a class="tabbar__item" href="#/" data-tab="home" aria-label="Heute">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fillable" d="M3.5 10.6 12 3.8l8.5 6.8V19a1.5 1.5 0 0 1-1.5 1.5h-4.2v-5.6h-5.6v5.6H5A1.5 1.5 0 0 1 3.5 19z"/></svg>
+      </a>
+      <a class="tabbar__item" href="#/kalender" data-tab="kalender" aria-label="Kalender">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="fillable" x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path class="nofill cut" d="M3.5 10h17"/><path class="nofill" d="M8 3v4M16 3v4"/></svg>
+      </a>
+      <a class="tabbar__item" href="#/training" data-tab="training" aria-label="Training">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="nofill" d="M7 12h10"/><rect class="fillable" x="3.2" y="8" width="3.8" height="8" rx="1.4"/><rect class="fillable" x="17" y="8" width="3.8" height="8" rx="1.4"/><path class="nofill" d="M1.8 10.5v3M22.2 10.5v3"/></svg>
+      </a>
+      <a class="tabbar__item" href="#/todos" data-tab="todos" aria-label="To-dos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="fillable" x="3.5" y="3.5" width="17" height="17" rx="5"/><path class="nofill cut" d="m8.2 12.3 2.6 2.6 5-5.4"/></svg>
+      </a>
+      <button class="tabbar__item" type="button" data-tab="more" aria-label="Alle Bereiche" aria-controls="islandPanel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="fillable" cx="6.5" cy="6.5" r="2.6"/><circle class="fillable" cx="17.5" cy="6.5" r="2.6"/><circle class="fillable" cx="6.5" cy="17.5" r="2.6"/><circle class="fillable" cx="17.5" cy="17.5" r="2.6"/></svg>
+      </button>
+    </nav>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
