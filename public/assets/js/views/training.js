@@ -234,7 +234,7 @@
           <div class="grid grid-3">${plans.map((p) => `
             <a class="card card--link" href="#/training/plan/${p.id}">
               <div class="card-title">${esc(p.name)}</div>
-              <div class="muted small" style="margin-top:4px">${(p.exercises || []).length} Übungen</div>
+              <div class="muted small" style="margin-top:4px">${(p.exercises || []).length} Übungen · ${(p.exercises || []).reduce((n, e) => n + (Number(e.sets) || 0), 0)} Sätze</div>
               <div class="small subtle" style="margin-top:8px">${(p.exercises || []).slice(0, 4).map((e) => esc(e.name)).join(" · ")}</div>
             </a>`).join("") || `<div class="card"><p class="empty">Noch kein Plan. Lege deinen ersten Trainingsplan an.</p></div>`}
           </div>
@@ -283,14 +283,21 @@
 
   /* ---------- Trainingsplan bearbeiten ---------- */
 
-  function exerciseEditorRow(ex, i) {
+  function exerciseEditorRow(ex, i, list) {
+    const last = list ? i === list.length - 1 : false;
     return `
       <div class="exercise-block" data-ex="${i}">
-        <div class="field-row" style="grid-template-columns:minmax(0,1fr) 70px 70px 40px;align-items:end">
+        <div class="ex-head">
+          <span class="ex-num">${i + 1}</span>
+          <span class="ex-headname">${esc(ex.name || "Neue Übung")}</span>
+          <button type="button" class="icon-btn icon-btn--sm" data-move-ex="${i}:-1" aria-label="Übung nach oben schieben" ${i === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="icon-btn icon-btn--sm" data-move-ex="${i}:1" aria-label="Übung nach unten schieben" ${last ? "disabled" : ""}>↓</button>
+          <button type="button" class="icon-btn icon-btn--sm" data-remove-ex="${i}" aria-label="Übung entfernen">×</button>
+        </div>
+        <div class="field-row" style="grid-template-columns:minmax(0,1fr) 70px 70px;align-items:end">
           <label class="field"><span>Übung</span><input class="input" name="name" value="${esc(ex.name || "")}" list="exerciseNames" placeholder="z. B. Bankdrücken"></label>
           <label class="field"><span>Sätze</span><input class="input" name="sets" type="number" min="1" max="20" inputmode="numeric" value="${esc(ex.sets || 3)}"></label>
           <label class="field"><span>Wdh.</span><input class="input" name="reps" value="${esc(ex.reps || "")}" placeholder="8–10"></label>
-          <button type="button" class="icon-btn" data-remove-ex="${i}" aria-label="Übung entfernen">×</button>
         </div>
         <div class="chip-row" style="margin-top:10px">${M.MUSCLES.map((m) => `
           <label class="chip ${(ex.muscles || []).includes(m.id) ? "is-active" : ""}"><input type="checkbox" hidden value="${m.id}" ${(ex.muscles || []).includes(m.id) ? "checked" : ""}>${m.name}</label>`).join("")}
@@ -310,7 +317,8 @@
           <div><p class="eyebrow">Trainingsplan</p><input class="input page-title" style="font-size:30px;background:none;padding:0;min-height:0" name="planName" value="${esc(plan.name)}" aria-label="Name des Plans"></div>
         </header>
         <datalist id="exerciseNames">${names.map((n) => `<option value="${esc(n.name)}">`).join("")}</datalist>
-        <section class="card" id="planEditor">${(plan.exercises || []).map(exerciseEditorRow).join("") || ""}</section>
+        <div class="plan-total" id="planTotal" aria-live="polite"></div>
+        <section class="card" id="planEditor"></section>
         <div class="chip-row" style="margin-top:14px">
           <button class="btn btn--soft" data-add-ex>+ Übung</button>
           <span style="flex:1"></span>
@@ -331,9 +339,45 @@
         reps: $('[name="reps"]', b).value.trim(),
         muscles: $$('input[type="checkbox"]:checked', b).map((c) => c.value)
       }));
+      // Gesamtzahl Sätze (live beim Tippen)
+      const total = () => {
+        const list = $$("[data-ex]", editor);
+        const sets = list.reduce((n, b) => n + (Number($('[name="sets"]', b).value) || 0), 0);
+        const perMuscle = {};
+        list.forEach((b) => {
+          const n = Number($('[name="sets"]', b).value) || 0;
+          $$('input[type="checkbox"]:checked', b).forEach((c) => { perMuscle[c.value] = (perMuscle[c.value] || 0) + n; });
+        });
+        const muscles = M.MUSCLES.filter((m) => perMuscle[m.id]).map((m) => `${m.name} ${perMuscle[m.id]}`);
+        $("#planTotal", root).innerHTML = `
+          <div class="plan-total__main"><b>${sets}</b> Sätze gesamt <span>· ${list.length} Übung${list.length === 1 ? "" : "en"}</span></div>
+          ${muscles.length ? `<div class="plan-total__muscles">${esc(muscles.join(" · "))}</div>` : ""}`;
+      };
       const draw = () => {
-        editor.innerHTML = exercises.map(exerciseEditorRow).join("") || `<p class="empty">Noch keine Übungen.</p>`;
+        editor.innerHTML = exercises.map((ex, i) => exerciseEditorRow(ex, i, exercises)).join("") || `<p class="empty">Noch keine Übungen.</p>`;
         $$("[data-remove-ex]", editor).forEach((b) => b.onclick = () => { exercises = read(); exercises.splice(+b.dataset.removeEx, 1); draw(); });
+        // Reihenfolge ändern
+        $$("[data-move-ex]", editor).forEach((b) => b.onclick = () => {
+          const [i, dir] = b.dataset.moveEx.split(":").map(Number);
+          const j = i + dir;
+          exercises = read();
+          if (j < 0 || j >= exercises.length) return;
+          [exercises[i], exercises[j]] = [exercises[j], exercises[i]];
+          draw();
+          const moved = $(`[data-ex="${j}"]`, editor);
+          if (moved) {
+            moved.classList.add("is-moved");
+            moved.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            const again = $(`[data-move-ex="${j}:${dir}"]`, moved);
+            if (again && !again.disabled) again.focus();
+          }
+        });
+        $$('[name="sets"]', editor).forEach((inp) => inp.addEventListener("input", total));
+        $$('[name="name"]', editor).forEach((inp) => inp.addEventListener("input", () => {
+          const head = $(".ex-headname", inp.closest("[data-ex]"));
+          if (head) head.textContent = inp.value.trim() || "Neue Übung";
+        }));
+        $$(".chip input", editor).forEach((c) => c.addEventListener("change", total));
         $$(".chip input", editor).forEach((c) => c.onchange = () => c.parentElement.classList.toggle("is-active", c.checked));
         // Bekannte Übung → Muskeln übernehmen
         $$('[name="name"]', editor).forEach((inp) => inp.addEventListener("change", () => {
@@ -341,8 +385,10 @@
           const block = inp.closest("[data-ex]");
           if (known && known.muscles.length && !$$('input[type="checkbox"]:checked', block).length) {
             $$('input[type="checkbox"]', block).forEach((c) => { c.checked = known.muscles.includes(c.value); c.parentElement.classList.toggle("is-active", c.checked); });
+            total();
           }
         }));
+        total();
       };
       draw();
       $("[data-add-ex]", root).onclick = () => { exercises = read(); exercises.push({ name: "", sets: 3, reps: "", muscles: [] }); draw(); $$('[name="name"]', editor).pop().focus(); };

@@ -591,6 +591,18 @@ body.is-locked .app-ui { display: none !important; }
 .set-table .idx { color: var(--subtle); width: 26px; font-weight: 600; }
 .exercise-block { border-top: 1px solid var(--line); padding: 16px 0; }
 .exercise-block:first-child { border-top: 0; padding-top: 4px; }
+.ex-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.ex-num { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--fill); }
+.ex-headname { flex: 1; min-width: 0; font-weight: 650; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-btn--sm { width: 34px; height: 34px; font-size: 16px; }
+.icon-btn:disabled { opacity: .3; pointer-events: none; }
+.exercise-block.is-moved { animation: exMoved .7s var(--ease, ease); }
+@keyframes exMoved { from { background: rgba(127,127,127,.18); } to { background: transparent; } }
+.plan-total { position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; margin: 0 0 12px; padding: 12px 16px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.plan-total__main { font-size: 15px; }
+.plan-total__main b { font-size: 22px; font-weight: 750; margin-right: 2px; }
+.plan-total__main span { opacity: .65; }
+.plan-total__muscles { margin-top: 4px; font-size: 12.5px; opacity: .65; }
 .exercise-block h4 { font-size: 16px; font-weight: 650; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .last-time { font-size: 13px; color: var(--muted); margin: 2px 0 8px; }
 
